@@ -54,19 +54,34 @@ export const addTask: Actor<Add> = (state) => {
     return state;
   }
 
+  const tarefas = [...state.tarefas];
+  const newTask = {
+    id: (tarefas.length + 1).toString(),
+    name: state.name,
+    done: false,
+    createdAt: new Date(),
+  };
+
+  tarefas.push(newTask);
+
+  const tarefasStr = JSON.stringify(tarefas);
+  localStorage.setItem("tarefas", tarefasStr);
+
   return {
     ...state,
-    tarefas: [
-      ...state.tarefas,
-      {
-        id: (state.tarefas.length + 1).toString(),
-        name: state.name,
-        done: false,
-        createdAt: new Date(),
-      },
-    ],
+    tarefas,
     error: "",
     name: "",
+  };
+};
+
+export const getTaskFromLocalStorage = (): TarefasState => {
+  const tarefasStr = localStorage.getItem("tarefas");
+  const tarefas = tarefasStr ? JSON.parse(tarefasStr) : [];
+
+  return {
+    ...makeInitialTarefaState(),
+    tarefas,
   };
 };
 
