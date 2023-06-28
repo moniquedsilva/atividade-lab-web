@@ -1,11 +1,22 @@
 import { Actor, AllActions, Remove, Search, Toggle, Write, Add, TarefaActionsEnum, TarefasState } from "./types";
 
-export const makeInitialTarefaState = (): TarefasState => ({
-  tarefas: [],
-  error: "",
-  name: "",
-  search: "",
-});
+export const makeInitialTarefaState = (): TarefasState => {
+  const tarefaStr = localStorage.getItem("tarefas");
+  const tarefas = tarefaStr ? JSON.parse(tarefaStr) : [];
+
+  return {
+    tarefas: tarefas,
+    error: "",
+    name: "",
+    search: "",
+  };
+};
+
+
+export const saveToLocalStorage = (state: any) => {
+  const tarefasStr = JSON.stringify(state);
+  localStorage.setItem("tarefas", tarefasStr);
+};
 
 export const removeTask: Actor<Remove> = (state, action) => {
   return {
@@ -15,12 +26,15 @@ export const removeTask: Actor<Remove> = (state, action) => {
 };
 
 export const toggleTask: Actor<Toggle> = (state, action) => {
-  return {
+  const tarefa = {
     ...state,
     tarefas: state.tarefas.map((t) =>
       t.id === action.payload.id ? { ...t, done: !t.done } : t
     ),
   };
+
+  saveToLocalStorage(tarefa);
+  return tarefa;
 };
 
 export const writeTask: Actor<Write> = (state, { payload }) => {
@@ -64,24 +78,13 @@ export const addTask: Actor<Add> = (state) => {
 
   tarefas.push(newTask);
 
-  const tarefasStr = JSON.stringify(tarefas);
-  localStorage.setItem("tarefas", tarefasStr);
+  saveToLocalStorage(newTask)
 
   return {
     ...state,
     tarefas,
     error: "",
     name: "",
-  };
-};
-
-export const getTaskFromLocalStorage = (): TarefasState => {
-  const tarefasStr = localStorage.getItem("tarefas");
-  const tarefas = tarefasStr ? JSON.parse(tarefasStr) : [];
-
-  return {
-    ...makeInitialTarefaState(),
-    tarefas,
   };
 };
 
